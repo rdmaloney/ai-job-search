@@ -8,7 +8,9 @@ An AI-powered job application framework built on [Claude Code](https://claude.co
 
 ## What this is
 
-A structured workflow that turns Claude Code into a full-stack job application assistant. The core workflow (self-profiling, fit evaluation, and the drafter-reviewer application pipeline) is **language- and country-agnostic**. The job portal search skills are built for the Danish market (Jobindex, Jobnet, Akademikernes Jobbank, etc.), but the pattern is designed to be swapped for your local job boards.
+A structured workflow that turns Claude Code into a full-stack job application assistant. The core workflow (self-profiling, fit evaluation, and the drafter-reviewer application pipeline) is **language- and country-agnostic**. This fork's job portal search skills are set up for the **UK market** (Reed's official API, LinkedIn, and WebSearch coverage of Indeed/TotalJobs/CV-Library) — the original upstream project ([MadsLorentzen/ai-job-search](https://github.com/MadsLorentzen/ai-job-search)) targets Denmark; the pattern is designed to be swapped for any local job boards.
+
+**This fork is deliberately assisted-only, not auto-apply.** It drafts a tailored CV, cover letter, and fit assessment per job — a human still reviews and clicks "Apply". No browser-automation submission bot is integrated, because the mature open-source options (e.g. [GodsScion/Auto_job_applier_linkedIn](https://github.com/GodsScion/Auto_job_applier_linkedIn), [Pickle-Pixel/ApplyPilot](https://github.com/Pickle-Pixel/ApplyPilot)) work by scripting LinkedIn/Indeed's UI, which risks the applicant's real account being flagged or banned mid job-search. If you want to revisit that later, see "Auto-apply" under Customization below.
 
 ```
 /setup          /scrape              /apply <url>
@@ -32,7 +34,7 @@ The framework encodes career guidance best practices, including structured evalu
 
 - [Claude Code](https://claude.com/claude-code) (CLI)
 - Python 3.10+
-- [Bun](https://bun.sh) (for Danish job search CLI tools)
+- [Bun](https://bun.sh) (for the UK job search CLI tools)
 - LaTeX distribution with `lualatex` and `xelatex`: [TeX Live](https://tug.org/texlive/) or [MiKTeX](https://miktex.org/). The CV compiles with `lualatex` (pdflatex often fails on modern MiKTeX installs with `fontawesome5` font-expansion errors); the cover letter compiles with `xelatex` because `cover.cls` requires `fontspec`.
 
 ## Quick start
@@ -47,14 +49,21 @@ cd ai-job-search
 ### 2. Install job search tools
 
 ```bash
-cd .agents/skills/jobbank-search/cli && bun install && cd ../../../..
-cd .agents/skills/jobdanmark-search/cli && bun install && cd ../../../..
-cd .agents/skills/jobindex-search/cli && bun install && cd ../../../..
-cd .agents/skills/jobnet-search/cli && bun install && cd ../../../..
+cd .agents/skills/reed-search/cli && bun install && cd ../../../..
 cd .agents/skills/linkedin-search/cli && bun install && cd ../../../..
 ```
 
-For `linkedin-search` the install is optional: it has zero runtime dependencies and runs with plain `bun`; `bun install` only pulls TypeScript dev types.
+Both have zero runtime dependencies (just TypeScript dev types); `bun install` is optional but keeps `tsc --noEmit` working. `reed-search` needs a free API key — see step 2b.
+
+### 2b. Get a Reed API key
+
+Register at https://www.reed.co.uk/developers/jobseeker for a free key, then:
+
+```bash
+export REED_API_KEY=your_key_here
+```
+
+(or add it to a local `.env` — already gitignored)
 
 ### 3. Set up your profile
 
@@ -77,7 +86,7 @@ This searches multiple job portals for positions matching your profile, deduplic
 ### 5. Apply to a job
 
 ```bash
-/apply https://jobindex.dk/job/1234567
+/apply https://www.reed.co.uk/jobs/some-role/54321987
 ```
 
 If the URL can't be fetched (some job portals block automated access), you can paste the job description directly instead:
@@ -122,10 +131,7 @@ ai-job-search/
 │   │   └── upskill/                   # /upskill skill gap analysis and learning plan
 │   └── settings.json                  # Claude Code permissions (shared, scoped)
 ├── .agents/skills/                    # Job portal CLI tools
-│   ├── jobbank-search/                # Akademikernes Jobbank (Denmark)
-│   ├── jobdanmark-search/             # Jobdanmark.dk (Denmark)
-│   ├── jobindex-search/               # Jobindex.dk (Denmark)
-│   ├── jobnet-search/                 # Jobnet.dk (Denmark, government portal)
+│   ├── reed-search/                   # Reed.co.uk official jobseeker API (UK, primary)
 │   └── linkedin-search/               # LinkedIn public job listings (country-agnostic)
 ├── cv/
 │   └── main_example.tex               # moderncv LaTeX template
@@ -202,9 +208,20 @@ The CV uses [moderncv](https://ctan.org/pkg/moderncv) (banking style). The cover
 
 ### Job search tools
 
-The four Danish CLI tools in `.agents/skills/` (Jobbank, Jobdanmark, Jobindex, Jobnet) demonstrate the pattern for building a job-portal integration for a specific market. If you're in a different country, you can build equivalent tools for your local job portals using the same structure.
+`reed-search` (`.agents/skills/reed-search/`) is the UK-market CLI tool: it calls Reed.co.uk's official public jobseeker API (free key required), so there's no scraping or ToS risk. It demonstrates the pattern for building a job-portal integration for a specific market — the original upstream project's four Danish CLI tools (Jobbank, Jobdanmark, Jobindex, Jobnet) are the same pattern for Denmark, in case you want to see both. If you're targeting a different country and its main board has a public API, build an equivalent tool the same way.
 
-For a **country-agnostic** starting point, the repo also includes **`linkedin-search`** — a job-search skill built on LinkedIn's public, unauthenticated `jobs-guest` endpoints. It is field-agnostic, has **zero runtime dependencies** (runs with just `bun`), and takes the search location as an explicit flag, so it works for any market out of the box (`-l "Berlin, Germany"`, `-l "Mumbai, Maharashtra, India"`, `-l "Remote"`, …). It is intended for **personal use only** — automated access is against LinkedIn's Terms of Service, so keep volume low. See `.agents/skills/linkedin-search/SKILL.md`.
+For a **country-agnostic** starting point, the repo also includes **`linkedin-search`** — a job-search skill built on LinkedIn's public, unauthenticated `jobs-guest` endpoints. It is field-agnostic, has **zero runtime dependencies** (runs with just `bun`), and takes the search location as an explicit flag, so it works for any market out of the box (`-l "Manchester, United Kingdom"`, `-l "Remote"`, …). It is intended for **personal use only** — automated access is against LinkedIn's Terms of Service, so keep volume low. See `.agents/skills/linkedin-search/SKILL.md`.
+
+Indeed, TotalJobs, and CV-Library don't offer a free public API, so `job-scraper` falls back to WebSearch/WebFetch for those — lower-volume and slower, but no automation-ToS exposure either.
+
+### Auto-apply (not enabled by default)
+
+This fork's `/apply` command always stops at drafting — it never submits anything. If you later want actual auto-submission, the two most credible open-source options as of mid-2026 are:
+
+- **[GodsScion/Auto_job_applier_linkedIn](https://github.com/GodsScion/Auto_job_applier_linkedIn)** (2.5k★, actively maintained) — LinkedIn Easy Apply automation with resume customization and question auto-fill.
+- **[Pickle-Pixel/ApplyPilot](https://github.com/Pickle-Pixel/ApplyPilot)** (1.2k★, newer) — broader board coverage (Indeed, Glassdoor, ZipRecruiter, Google Jobs, Workday portals, direct career sites) plus its own scoring/tailoring pipeline.
+
+Both work by driving a real browser session against the job site's UI, which is exactly the kind of automated access LinkedIn's (and most boards') Terms of Service prohibit — real risk of the applicant's account being flagged or restricted, which is worse than a slower manual apply during an active job search. Wire one in only with that tradeoff in mind, and consider testing on lower-stakes boards before touching a LinkedIn account you care about.
 
 ### Salary benchmarking
 
@@ -243,6 +260,7 @@ To get the most from this, invest time during `/setup` in describing not just yo
 
 ## Acknowledgements
 
+- [Mads Lorentzen](https://github.com/MadsLorentzen) for the original [ai-job-search](https://github.com/MadsLorentzen/ai-job-search) framework this is forked from
 - [Mikkel Krogholm](https://github.com/mikkelkrogsholm) ([skills repo](https://github.com/mikkelkrogsholm/skills)) for the job search CLI skills
 - Built with [Claude Code](https://claude.com/claude-code) by [Anthropic](https://anthropic.com)
 

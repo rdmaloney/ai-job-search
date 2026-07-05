@@ -1,0 +1,19 @@
+{
+  "name": "reed-cli",
+  "version": "1.0.0",
+  "description": "CLI for searching UK jobs via Reed.co.uk's official public jobseeker API. Requires a free REED_API_KEY.",
+  "type": "module",
+  "main": "src/cli.ts",
+  "bin": {
+    "reed-search": "src/cli.ts"
+  },
+  "scripts": {
+    "start": "bun run src/cli.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "@types/bun": "latest"
+  }
+}

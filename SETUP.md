@@ -24,10 +24,18 @@ python --version
 
 ### Bun (for job search tools)
 
-The job portal CLIs (four Danish portals plus the country-agnostic LinkedIn tool) are written in TypeScript and run with Bun:
+The job portal CLIs (Reed's official UK API, plus the country-agnostic LinkedIn tool) are written in TypeScript and run with Bun:
 
 ```bash
 curl -fsSL https://bun.sh/install | bash
+```
+
+### Reed API key (for UK job search)
+
+Register for a free key at https://www.reed.co.uk/developers/jobseeker, then:
+
+```bash
+export REED_API_KEY=your_key_here
 ```
 
 ### LaTeX (for compiling CVs and cover letters)
@@ -52,12 +60,12 @@ Or manually: fork on GitHub, then clone your fork.
 ## 3. Install job search CLI dependencies
 
 ```bash
-for tool in jobbank-search jobdanmark-search jobindex-search jobnet-search linkedin-search; do
+for tool in reed-search linkedin-search; do
   cd .agents/skills/$tool/cli && bun install && cd ../../../..
 done
 ```
 
-For `linkedin-search` the install is optional: it has zero runtime dependencies and runs with plain `bun`; `bun install` only pulls TypeScript dev types.
+Both have zero runtime dependencies and run with plain `bun`; `bun install` only pulls TypeScript dev types.
 
 ## 4. Run the setup interview
 
@@ -123,7 +131,7 @@ This creates `salary_data.json` which the `/apply` workflow uses for salary benc
 Find a job posting you're interested in, then:
 
 ```
-/apply https://jobindex.dk/job/1234567
+/apply https://www.reed.co.uk/jobs/some-role/54321987
 ```
 
 Or paste the job description directly:
@@ -157,7 +165,7 @@ cd cover_letters && xelatex cover_<company>_<role>.tex && cd ..
 This is expected if you haven't set up salary benchmarking. The `/apply` workflow skips this step automatically.
 
 ### Job search CLI tools not working
-Make sure Bun is installed and you ran `bun install` in each CLI directory. The tools require network access to fetch job listings.
+Make sure Bun is installed and you ran `bun install` in each CLI directory. The tools require network access to fetch job listings. `reed-search` additionally requires `REED_API_KEY` to be set — it errors clearly if it's missing.
 
 ### LaTeX compilation errors
 - CV: uses `lualatex` (pdflatex often fails on modern MiKTeX with `fontawesome5` font-expansion errors; lualatex handles the same sources cleanly)

@@ -4,28 +4,29 @@
 
 ## Search Sites
 
-Primary (Danish job market):
-- **jobindex.dk** - largest Danish job board
-- **linkedin.com/jobs** - LinkedIn job listings (filter: Denmark / your city)
-- **karriere.dk** - IDA's job board (engineering/science roles)
-- **jobfinder.dk** - another major Danish job board
-- **akademikernes.dk** - academic union job board
+Primary (structured APIs, no ToS risk):
+- **reed-search skill** - Reed.co.uk official jobseeker API (`bun run skills/reed-search/cli/src/cli.ts search`)
+- **linkedin-search skill** - LinkedIn public listings (personal use only, keep volume low)
 
-Secondary (company career pages via Google):
-- Direct Google searches with `site:` filters for known target companies
+Secondary (via WebSearch `site:` filters - no free API):
+- **indeed.co.uk** - largest UK job board
+- **totaljobs.com** - major UK generalist board
+- **cv-library.co.uk** - UK job board, strong for retail/customer service/admin roles
+- Direct Google searches with `site:` filters for known target companies' career pages
 
 ## Query Categories
 
-Queries are grouped by priority. Each query should be combined with your location terms (e.g. "Copenhagen", "Sjælland", "Hovedstaden") where the site supports it.
+Queries are grouped by priority. Each query should be combined with your location terms (e.g. "Manchester", "Greater Manchester", "Remote") where the site supports it.
 
 ### Priority 1: [YOUR_PRIMARY_ROLE_TYPE]
 
 These match your strongest and most desired career direction.
 
 ```
-site:jobindex.dk "[YOUR_PRIMARY_JOB_TITLE]" [YOUR_CITY]
-site:jobindex.dk "[YOUR_KEY_SKILL]" [YOUR_CITY]
-site:linkedin.com/jobs "[YOUR_PRIMARY_JOB_TITLE]" [YOUR_COUNTRY]
+reed-search: --query "[YOUR_PRIMARY_JOB_TITLE]" --location "[YOUR_CITY]"
+reed-search: --query "[YOUR_KEY_SKILL]" --location "[YOUR_CITY]"
+linkedin-search: --query "[YOUR_PRIMARY_JOB_TITLE]" --location "[YOUR_CITY], United Kingdom"
+site:indeed.co.uk "[YOUR_PRIMARY_JOB_TITLE]" [YOUR_CITY]
 ```
 
 ### Priority 2: [YOUR_DOMAIN_EXPERTISE]
@@ -33,9 +34,9 @@ site:linkedin.com/jobs "[YOUR_PRIMARY_JOB_TITLE]" [YOUR_COUNTRY]
 These match your domain expertise.
 
 ```
-site:jobindex.dk [YOUR_DOMAIN_KEYWORD_1] [YOUR_CITY] OR [YOUR_REGION]
-site:jobindex.dk [YOUR_DOMAIN_KEYWORD_2] [YOUR_COUNTRY]
-site:linkedin.com/jobs [YOUR_DOMAIN_KEYWORD_1] [YOUR_CITY] [YOUR_COUNTRY]
+reed-search: --query "[YOUR_DOMAIN_KEYWORD_1]" --location "[YOUR_CITY]"
+site:totaljobs.com [YOUR_DOMAIN_KEYWORD_2] [YOUR_CITY]
+linkedin-search: --query "[YOUR_DOMAIN_KEYWORD_1]" --location "[YOUR_CITY], United Kingdom"
 ```
 
 ### Priority 3: [YOUR_ADJACENT_ROLE_TYPE]
@@ -43,18 +44,18 @@ site:linkedin.com/jobs [YOUR_DOMAIN_KEYWORD_1] [YOUR_CITY] [YOUR_COUNTRY]
 Adjacent roles you could pivot into.
 
 ```
-site:jobindex.dk "[YOUR_ADJACENT_TITLE_1]" [YOUR_KEY_SKILL] [YOUR_CITY]
-site:jobindex.dk "[YOUR_ADJACENT_TITLE_2]" [YOUR_KEY_SKILL] [YOUR_CITY]
+reed-search: --query "[YOUR_ADJACENT_TITLE_1]" --location "[YOUR_CITY]"
+site:cv-library.co.uk "[YOUR_ADJACENT_TITLE_2]" [YOUR_KEY_SKILL] [YOUR_CITY]
 ```
 
-### Priority 4: Broader Technical / Consulting
+### Priority 4: Broader / Entry Points
 
-Wider net for general technical roles.
+Wider net for general roles.
 
 ```
-site:jobindex.dk [YOUR_KEY_SKILL] developer [YOUR_CITY]
-site:linkedin.com/jobs "[YOUR_KEY_SKILL] developer" [YOUR_CITY]
-site:jobindex.dk "technical consultant" [YOUR_DOMAIN] [YOUR_CITY]
+reed-search: --query "[YOUR_KEY_SKILL]" --location "[YOUR_CITY]" --fullTime
+linkedin-search: --query "[YOUR_KEY_SKILL]" --location "Remote"
+site:indeed.co.uk "[YOUR_KEY_SKILL]" [YOUR_CITY]
 ```
 
 ## Location Filter
